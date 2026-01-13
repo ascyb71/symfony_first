@@ -1,0 +1,238 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard StockMaster{% endblock %}
+
+{# ======================================================= #}
+{# 1. LE CSS SPÉCIFIQUE AU DASHBOARD                       #}
+{# ======================================================= #}
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Fond de page légèrement grisé pour faire ressortir les cartes */
+        body {
+            background-color: #f8f9fa !important;
+        }
+
+        /* STYLE SHADOW BOX (Boîtes flottantes) */
+        .shadow-box {
+            background-color: white;
+            border-radius: 15px;
+            border: none;
+            /* Ombre douce et large */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 25px;
+            height: 100%;
+        }
+
+        /* Effet au survol : la boîte monte légèrement */
+        .shadow-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        /* TITRES */
+        h1 {
+            color: #2c3e50;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* ICÔNES COLORÉES */
+        .icon-box {
+            width: 55px;
+            height: 55px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            color: white;
+            margin-left: auto; /* Pousse l'icône à droite */
+        }
+
+        /* Dégradés pour les icônes */
+        .icon-blue { background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); box-shadow: 0 4px 10px rgba(9, 132, 227, 0.3); }
+        .icon-red  { background: linear-gradient(135deg, #ff7675 0%, #d63031 100%); box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3); }
+        .icon-green{ background: linear-gradient(135deg, #55efc4 0%, #00b894 100%); box-shadow: 0 4px 10px rgba(0, 184, 148, 0.3); }
+
+        /* TEXTES DES CARTES */
+        .stat-label {
+            color: #b2bec3;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            color: #2d3436;
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        /* TABLEAU MODERNE */
+        .table-custom {
+            margin-top: 10px;
+        }
+        .table-custom th {
+            color: #a4b0be;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 2px solid #f1f2f6;
+            padding-bottom: 15px;
+        }
+        .table-custom td {
+            vertical-align: middle;
+            color: #2d3436;
+            padding: 20px 10px;
+            border-bottom: 1px solid #f8f9fa;
+            font-weight: 500;
+        }
+
+        /* IMAGE RONDE */
+        .img-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            background-color: #dfe6e9;
+            border: 2px solid white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* BADGES (Stock / Rupture) */
+        .badge-pill {
+            padding: 8px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 800;
+        }
+        .badge-stock { background-color: #e6fffa; color: #00b894; }
+        .badge-rupture { background-color: #ffeaea; color: #d63031; }
+
+    </style>
+{% endblock %}
+
+{# ======================================================= #}
+{# 2. LE CONTENU (BODY)                                    #}
+{# ======================================================= #}
+{% block body %}
+<div class="container mt-4 mb-5">
+
+    <div class="d-flex align-items-center justify-content-between mb-5">
+        <div>
+            <h1 class="mb-0">Dashboard</h1>
+            <p class="text-muted mt-1">Aperçu global de votre activité</p>
+        </div>
+        <button class="btn btn-light shadow-sm text-dark fw-bold" onclick="location.reload();" style="border-radius: 12px; padding: 10px 20px;">
+            <i class="fas fa-sync-alt me-2 text-primary"></i> Actualiser
+        </button>
+    </div>
+
+    <div class="row g-4 mb-5">
+
+        <div class="col-md-4">
+            <div class="shadow-box d-flex align-items-center">
+                <div>
+                    <div class="stat-label">Valeur du Stock</div>
+                    <div class="stat-value">{{ totalValue|number_format(2, ',', ' ') }} <small style="font-size: 1rem; color: #636e72;">MAD</small></div>
+                </div>
+                <div class="icon-box icon-blue">
+                    <i class="fas fa-wallet"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="shadow-box d-flex align-items-center">
+                <div>
+                    <div class="stat-label">En Rupture</div>
+                    <div class="stat-value" style="color: #d63031;">{{ outOfStockCount }}</div>
+                </div>
+                <div class="icon-box icon-red">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="shadow-box d-flex align-items-center">
+                <div>
+                    <div class="stat-label">Références</div>
+                    <div class="stat-value">{{ products|length }}</div>
+                </div>
+                <div class="icon-box icon-green">
+                    <i class="fas fa-boxes"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="shadow-box p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-bold m-0" style="color: #2d3436;">📦 Derniers Arrivages</h5>
+            <a href="{{ path('app_product_index') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">Tout voir</a>
+        </div>
+
+        <table class="table table-custom table-hover">
+            <thead>
+                <tr>
+                    <th>Produit</th>
+                    <th>Nom</th>
+                    <th>Prix Unitaire</th>
+                    <th>État du stock</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in latestProducts %}
+                    <tr>
+                        <td>
+                            <img src="{{ product.image ? product.image : 'https://via.placeholder.com/100x100?text=No+Img' }}" alt="img" class="img-avatar">
+                        </td>
+                        <td>
+                            <div class="fw-bold" style="font-size: 1rem;">{{ product.title }}</div>
+                            <small class="text-muted">Ref: #{{ product.id }}</small>
+                        </td>
+
+                        <td class="fw-bold text-primary" style="font-size: 1.1rem;">
+                            {{ product.price|number_format(2, ',', ' ') }} MAD
+                        </td>
+
+                        <td>
+                            {% if product.stock > 0 %}
+                                <span class="badge-pill badge-stock">
+                                    <i class="fas fa-check-circle me-1"></i> EN STOCK ({{ product.stock }})
+                                </span>
+                            {% else %}
+                                <span class="badge-pill badge-rupture">
+                                    <i class="fas fa-times-circle me-1"></i> RUPTURE
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            Aucun produit n'a été ajouté récemment.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{# ======================================================= #}
+{# 3. JAVASCRIPT LOCAL                                     #}
+{# ======================================================= #}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        console.log('Dashboard chargé. Devise : MAD');
+    </script>
+{% endblock %}
