@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted; // 1. IMPORT IMPORTANT
 
 #[Route('/product')]
 final class ProductController extends AbstractController
@@ -17,15 +18,14 @@ final class ProductController extends AbstractController
     #[Route(name: 'app_product_index', methods: ['GET'])]
     public function index(ProductRepository $productRepository, Request $request): Response
     {
-        // 1. On récupère ce que l'utilisateur a tapé dans le champ 'q'
+        // On garde votre recherche, c'est très bien !
         $searchTerm = $request->query->get('q');
 
         if ($searchTerm) {
-        // Cette ligne appelle la fonction que tu viens de créer dans le Repository
-        $products = $productRepository->findBySearchTerm($searchTerm);
-    } else {
-        $products = $productRepository->findAll();
-    }
+            $products = $productRepository->findBySearchTerm($searchTerm);
+        } else {
+            $products = $productRepository->findAll();
+        }
 
         return $this->render('product/index.html.twig', [
             'products' => $products,
@@ -33,6 +33,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/new', name: 'app_product_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')] // 2. Tout le monde (connecté) peut créer
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $product = new Product();
@@ -61,6 +62,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_product_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_USER')] // 3. Tout le monde peut modifier
     public function edit(Request $request, Product $product, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(ProductType::class, $product);
@@ -79,6 +81,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_product_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')] // 4. SEUL L'ADMIN PEUT SUPPRIMER
     public function delete(Request $request, Product $product, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->getPayload()->getString('_token'))) {
