@@ -19,11 +19,17 @@
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label fw-bold">Prix (DH)</label>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Prix (MAD)</label>
                                 {{ form_widget(form.price, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 1200'}}) }}
                             </div>
-                            <div class="col-md-6 mb-3">
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-bold">Stock</label>
+                                {{ form_widget(form.stock, {'attr': {'class': 'form-control', 'placeholder': 'Ex: 50'}}) }}
+                            </div>
+
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label fw-bold">Catégorie</label>
                                 {{ form_widget(form.category, {'attr': {'class': 'form-select'}}) }}
                             </div>
